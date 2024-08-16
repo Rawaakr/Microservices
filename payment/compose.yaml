@@ -1,0 +1,36 @@
+services:
+  payment:
+      image: paymentimage:latest
+      ports: 
+        - "3000:3000"
+      environment:
+        - DATABASE_URL=${DB_URL}
+        - KONNECT_API_URL=${KONNECT_API_URL}
+        - KONNECT_API_KEY=${KONNECT_API_KEY}
+        - NGROK_AUTH_TOKEN=${NGROK_AUTH_TOKEN}
+
+      depends_on:
+        - postgresql
+      networks:
+        - paymentnetwork
+
+  postgresql:
+    image: postgres:9.6
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - paymentnetwork
+
+networks:
+  paymentnetwork:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local

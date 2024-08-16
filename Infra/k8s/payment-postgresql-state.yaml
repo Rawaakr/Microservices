@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-statefulset2
+  labels:
+    app: postgresql-statefulset2
+spec:
+  serviceName: 'postgresql-service2'
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql-statefulset2
+  template:
+    metadata:
+      labels:
+        app: postgresql-statefulset2
+    spec:
+      containers:
+      - name: paymentdb-container
+        image: postgres:14.12-alpine3.20
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: payment-secret
+              key: db-username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: payment-secret
+              key: db-password
+        - name: POSTGRES_DB
+          value: Payments
+        volumeMounts:
+        - name: db-persistent-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+  volumeClaimTemplates:
+  - metadata:
+      name: db-persistent-storage
+    spec:
+      accessModes: ['ReadWriteOnce']
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-service2
+spec:
+  selector:
+    app: postgresql-statefulset2
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
