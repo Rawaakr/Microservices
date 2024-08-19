@@ -2,10 +2,10 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentDto } from './dto/Payment.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { NatsConfig } from 'src/nats-config';
-import { Subjects } from "../../../common/src/subjects/subjects";
-import { UserConnectedEvent } from "../../../common/src/events/user-connected";
+import { PrismaService } from '../prisma/prisma.service';
+import { NatsConfig } from '../nats-config';
+import { Subjects } from "@common/subjects/subjects";
+import { UserConnectedEvent } from "@common/events/user-connected";
 import { ConsumerOptsBuilder, JetStreamSubscription } from 'nats';
 @Injectable()
 export class PaymentService implements OnModuleInit{

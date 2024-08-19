@@ -4,5 +4,7 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true
-  }
+  },
+  "entryFile": "payment/src/main"
+
 }

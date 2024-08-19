@@ -11,8 +11,17 @@ services:
 
       depends_on:
         - postgresql
+        - nats
       networks:
         - paymentnetwork
+        - natsnetwork
+
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+    networks:
+      - natsnetwork
 
   postgresql:
     image: postgres:9.6
@@ -29,6 +38,8 @@ services:
 
 networks:
   paymentnetwork:
+    driver: bridge
+  natsnetwork:
     driver: bridge
 
 volumes:
