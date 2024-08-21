@@ -10,10 +10,9 @@ import { isValidRole } from '../utils/role.utils';
 import { ResetPasswordRequestDto } from './dto/resetPasswordRequest.dto';
 import { ResetPasswordConfirmDto } from './dto/resetPasswordConfirm.dto';
 import { DeleteAccountDto } from './dto/deleteAccount.dto';
-import { NatsConfig } from 'src/nats-config';
-import { Subjects } from '../../../common/src/subjects/subjects';
-import { UserConnectedEvent} from '../../../common/src/events/user-connected';
-import { ClientProxy } from '@nestjs/microservices';
+import { NatsConfig } from '../nats-config';
+import { Subjects } from '@common/subjects/subjects';
+import { UserConnectedEvent} from '@common/events/user-connected';
 @Injectable()
 export class AuthService {
     private transporter: nodemailer.Transporter;
@@ -133,13 +132,17 @@ export class AuthService {
 
         const TokenJwt = await this.jwtService.signAsync(payload);
 
-        const js = NatsConfig.getJetStream();
-        await js.publish(Subjects.UserConnected, JSON.stringify({
-            userId : userExist.id,
-            email: userExist.email,
-        
-        }as UserConnectedEvent));
-        console.log("User connected event published")
+        try {
+            const js = NatsConfig.getJetStream();
+            await js.publish(Subjects.UserConnected, JSON.stringify({
+              userId: userExist.id,
+              email: userExist.email,
+            } as UserConnectedEvent));
+            console.log("User connected event published");
+          } catch (natsError) {
+            // Log the error but don't throw it to allow login to proceed
+            console.error("Failed to publish user connected event:", natsError);
+          }
         return {
             TokenJwt,
             user: {

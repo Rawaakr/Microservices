@@ -1,11 +1,13 @@
 FROM node:18.19.1
 WORKDIR /auth/
-COPY package*.json ./
+COPY common ./common
+WORKDIR /auth/authentication
+COPY authentication/package*.json ./
 RUN ["npm","install"]
-COPY . .
+COPY authentication/. ./
 RUN npm run build && \
     npx prisma migrate && \
     npx prisma generate && \
     npm install -g @nestjs/cli
 
-CMD ["node","dist/main.js"]
+CMD ["node", "./dist/authentication/src/main.js"]

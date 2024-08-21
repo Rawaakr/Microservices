@@ -1,10 +1,12 @@
 FROM node:18.19.1
 WORKDIR /payment/
+COPY common ./common
+WORKDIR /payment/payment
 RUN npm install -g @nestjs/cli && apt-get update && apt-get install -y curl sudo && apt-get install -y curl jq
-COPY package*.json .
+COPY payment/package*.json ./
 RUN ["npm","install"]
-COPY . .
-COPY start.sh ./
+COPY payment/. ./
+COPY payment/start.sh ./
 RUN chmod +x start.sh
 RUN ["nest","build"]
 CMD ["./start.sh"]

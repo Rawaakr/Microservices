@@ -14,5 +14,5 @@ NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].publi
 echo "Ngrok URL: $NGROK_URL"
 
 export WEBHOOK_URL="$NGROK_URL/payment/webhook" > .env
-node dist/main.js
+node dist/payment/src/main.js
 

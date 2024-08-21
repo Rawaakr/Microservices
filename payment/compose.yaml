@@ -2,26 +2,19 @@ services:
   payment:
       image: paymentimage:latest
       ports: 
-        - "3000:3000"
+        - "3005:3000"
       environment:
         - DATABASE_URL=${DB_URL}
         - KONNECT_API_URL=${KONNECT_API_URL}
         - KONNECT_API_KEY=${KONNECT_API_KEY}
         - NGROK_AUTH_TOKEN=${NGROK_AUTH_TOKEN}
+        - NATS_SERVER=nats://nats:4222
 
       depends_on:
         - postgresql
-        - nats
       networks:
         - paymentnetwork
         - natsnetwork
-
-  nats:
-    image: nats:latest
-    ports:
-      - "4222:4222"
-    networks:
-      - natsnetwork
 
   postgresql:
     image: postgres:9.6
@@ -30,7 +23,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
@@ -40,8 +33,10 @@ networks:
   paymentnetwork:
     driver: bridge
   natsnetwork:
-    driver: bridge
+    external: true
 
 volumes:
   postgres-data:
+    driver: local
+  nats-data:
     driver: local

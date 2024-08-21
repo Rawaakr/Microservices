@@ -6,13 +6,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NatsConfig } from '../nats-config';
 import { Subjects } from "@common/subjects/subjects";
 import { UserConnectedEvent } from "@common/events/user-connected";
-import { ConsumerOptsBuilder, JetStreamSubscription } from 'nats';
+import {  consumerOpts, JetStreamClient, JetStreamSubscription } from 'nats';
 @Injectable()
 export class PaymentService implements OnModuleInit{
     private connectedUsers: Set<string>= new Set();
     private apiKey : string;
     private apiUrl : string ;
     private WEBHOOK_URL : string ;
+    private js : JetStreamClient;
+    private listenerInitialized = false;
     constructor(private readonly httpService: HttpService,
         private configService : ConfigService,
         private readonly prismaService : PrismaService,
@@ -29,21 +31,35 @@ export class PaymentService implements OnModuleInit{
         };
     }
     async onModuleInit() {
-        await this.UserConnectedListener();
-    } 
+        if(!this.listenerInitialized){
+            await NatsConfig.connect(this.configService.get<string>('NATS_SERVER'));
+            this.js = NatsConfig.getJetStream();
+            await this.UserConnectedListener();
+            this.listenerInitialized = true ; 
+        }
+    }
     
     private async UserConnectedListener() {
-    
-        const js = NatsConfig.getJetStream();
-        const sub:JetStreamSubscription =await  js.subscribe(Subjects.UserConnected,{});
+        const opts = consumerOpts(); 
+        opts.durable("service-payment");
+        opts.ackExplicit();
+        opts.ackWait(5000);
+        opts.deliverTo("connected_user_deliver_subject"); 
+        const sub : JetStreamSubscription = await this.js.subscribe('user:connected',opts);
+        console.log("UserConnectedListener set up successfully");
+
+        // Traiter les messages reçus
         (async () => {
-            for await ( const msg of sub){
+            for await (const msg of sub) {
+                console.log("Message reçu :", msg.data.toString());
                 const event: UserConnectedEvent = JSON.parse(msg.data.toString());
-                this.handleUserConnected(event);
+                await this.handleUserConnected(event); 
+                await msg.ack();
+                console.log("Message ack envoyé");
             }
         })();
-    }
-    handleUserConnected(event: UserConnectedEvent) {
+        }
+    private async handleUserConnected(event: UserConnectedEvent) {
         this.connectedUsers.add(event.email);
         console.log(`user with email : ${event.email} is available for payments`)
     }
@@ -51,7 +67,7 @@ export class PaymentService implements OnModuleInit{
 
         if(!this.connectedUsers.has(paymentDto.email)){
             throw new UnauthorizedException(`User is not connected. Payment cannot be initiated `)
-        }
+         }
 
         console.log("Webhook URL:", this.WEBHOOK_URL);
 

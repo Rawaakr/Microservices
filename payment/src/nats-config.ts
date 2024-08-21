@@ -1,20 +1,35 @@
-import { JetStreamClient, JetStreamManager, NatsConnection, RetentionPolicy, StorageType, connect} from "nats";
-import { Subjects } from "../../common/src/subjects/subjects";
+import { Subjects } from "@common/subjects/subjects";
+import { ConfigService } from "@nestjs/config";
+import { JetStreamClient, JetStreamManager, NatsConnection, connect, StorageType,RetentionPolicy, AckPolicy} from "nats";
 
 export class NatsConfig {
-
+    constructor(){}
     private static connection : NatsConnection;
     private static js : JetStreamClient;
     private static jsm : JetStreamManager;
-    static async connect(): Promise<void> {
+
+    static async connect(natsServer : string): Promise<void> {
         if(!this.connection){
-            this.connection = await connect({servers : 'nats://localhost:4222'});
+            this.connection = await connect({servers :  natsServer });
+            console.log("Connected to NATS server successfully");
+            console.log("Creating JetStream client...");
             this.js = this.connection.jetstream();
-            console.log("Payment sub connected to nats")
+            // console.log("JetStream client created successfully");
+            // this.jsm = await this.js.jetstreamManager() ; 
+            // console.log("JetStream Manager created successfully");
+
+
+            // await this.jsm.consumers.add("MY_STREAM",{
+            //     durable_name: "payment-service",
+            //     ack_policy: AckPolicy.Explicit,
+            //     ack_wait : 5000 ,
+
+            // });
+            //console.log("consumer created")
         }
     }
 
-    static getJetStream(): JetStreamClient {
+    static getJetStream(): JetStreamClient{
         if(!this.js) {
             throw new Error('NATS JetStream not connected');
         }

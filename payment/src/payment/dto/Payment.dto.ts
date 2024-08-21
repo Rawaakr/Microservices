@@ -48,7 +48,8 @@ export class PaymentDto {
 
     @IsString()
     readonly phoneNumber: string;
-
+    
+    @IsNotEmpty()
     @IsEmail()
     readonly email: string;
 

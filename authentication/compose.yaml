@@ -6,13 +6,17 @@ services:
     environment:
       - DATABASE_URL=${DB_URL}
       - SECRET_KEY=${SECRET_KEY}
+      - NATS_SERVER=nats://nats:4222
     depends_on:
       - postgresql
+      - nats
+      - mailhog
     networks:
-      - mynetwork
+      - appnetwork
+      - natsnetwork
 
   postgresql:
-    image: postgres:9.6
+    image: postgres:15
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -22,12 +26,35 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - mynetwork
+      - appnetwork
+
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+    networks:
+      - natsnetwork
+    volumes:
+      - nats-data:/data
+    command: ["-js", "-store_dir", "/data"]
+    hostname: nats
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    networks:
+      - appnetwork
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
 networks:
-  mynetwork:
+  appnetwork:
     driver: bridge
-
+  natsnetwork:
+    external: true
+    
 volumes:
   postgres-data:
+    driver: local
+  nats-data:
     driver: local
