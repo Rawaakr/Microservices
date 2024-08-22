@@ -2,7 +2,6 @@ import { Module, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { PaymentModule } from './payment/payment.module';
-import { PaymentController } from './payment/payment.controller';
 import { PaymentService } from './payment/payment.service';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -13,7 +12,6 @@ import { NatsConfig } from './nats-config';
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     HttpModule,
-    PaymentModule,
     PrismaModule,
     ClientsModule.registerAsync([
       {
@@ -32,11 +30,7 @@ import { NatsConfig } from './nats-config';
   providers: [PaymentService, PrismaService],
   exports: [ClientsModule],
 })
-export class AppModule implements OnModuleDestroy {  
-
-  async onModuleDestroy() {
-    await NatsConfig.disconnect();
-  }
+export class AppModule{  
 }
 
 

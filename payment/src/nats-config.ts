@@ -1,12 +1,10 @@
-import { Subjects } from "@common/subjects/subjects";
-import { ConfigService } from "@nestjs/config";
 import { JetStreamClient, JetStreamManager, NatsConnection, connect, StorageType,RetentionPolicy, AckPolicy} from "nats";
 
 export class NatsConfig {
     constructor(){}
     private static connection : NatsConnection;
     private static js : JetStreamClient;
-    private static jsm : JetStreamManager;
+    //private static jsm : JetStreamManager;
 
     static async connect(natsServer : string): Promise<void> {
         if(!this.connection){
@@ -14,7 +12,7 @@ export class NatsConfig {
             console.log("Connected to NATS server successfully");
             console.log("Creating JetStream client...");
             this.js = this.connection.jetstream();
-            // console.log("JetStream client created successfully");
+            console.log("JetStream client created successfully");
             // this.jsm = await this.js.jetstreamManager() ; 
             // console.log("JetStream Manager created successfully");
 
@@ -25,7 +23,7 @@ export class NatsConfig {
             //     ack_wait : 5000 ,
 
             // });
-            //console.log("consumer created")
+            // console.log("consumer created")
         }
     }
 
