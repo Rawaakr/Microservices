@@ -7,6 +7,7 @@ import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { NatsConfig } from './nats-config';
+import { PaymentController } from './payment/payment.controller';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NatsConfig } from './nats-config';
     ]),
   ],
   providers: [PaymentService, PrismaService],
+  controllers:[PaymentController],
   exports: [ClientsModule],
 })
 export class AppModule{  
