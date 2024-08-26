@@ -5,7 +5,7 @@ echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sourc
 apt update
 apt install -y ngrok jq
 ngrok config add-authtoken $NGROK_AUTH_TOKEN
-ngrok http 30210 &
+ngrok http 192.168.58.2:30210 &
 
 sleep 5 
 

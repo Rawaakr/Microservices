@@ -16,9 +16,9 @@ spec:
     spec:
       containers:
       - name: paymentapp-container
-        image: rawaakr1/paymentimage:latest
+        image: rawaakr1/paymentimages:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 3002
         env:
         - name: POSTGRES_USER
           valueFrom:
@@ -51,8 +51,8 @@ spec:
             configMapKeyRef:
               name: payment-config
               key: KONNECT_API_URL
-        - name: WEBHOOK_URL
-          value: "http://192.168.58.2:30210/payment/webhook"
+        - name: NATS_SERVER
+          value: "nats://nats:4222"
         resources:
           requests:
             memory: "512Mi"
@@ -65,7 +65,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: payment-service
-  labels: S
+  labels: 
     app: paymentapp
 spec : 
   type: NodePort
@@ -73,6 +73,6 @@ spec :
     app: paymentapp
   ports:
   - protocol: TCP
-    port: 3000
-    targetPort: 3000
+    port: 3002
+    targetPort: 3002
     nodePort: 30210

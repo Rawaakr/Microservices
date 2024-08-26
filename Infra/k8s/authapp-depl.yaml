@@ -41,6 +41,8 @@ spec:
             secretKeyRef:
               name: authapp-secret
               key: secret-key
+        - name: NATS_SERVER
+          value: "nats://nats:4222"
         resources:
           requests:
             memory: "512Mi"
